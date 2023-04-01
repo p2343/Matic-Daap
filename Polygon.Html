@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MECHE Daap</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.5/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="Polygon.css">
+</head>
+<body>
+    <div class="wallet">
+        <img src="logo-budget.png" width="150px" alt="logo not found">
+        <input class="deposit" type="number" min="1" placeholder="Depositing amount" /><br />
+        <button class="depositbutton" onclick="deposit()">Deposit</button><br>
+
+        <input class="withdrawal" type="number" min="1" placeholder="Withdrawal amount" /><br />
+        <button class="withdrawalbutton" onclick="withdraw()">Withdrawal</button>
+    </div>
+
+    <script>
+        const polygonNetworkId = 137;
+
+        async function deposit() {
+            if (typeof window.ethereum !== "undefined") {
+                console.log("MetaMask is installed!");
+
+                try {
+                    await ethereum.request({ method: "eth_requestAccounts" });
+                    console.log("connect to metamask");
+                } catch (error) {
+                    console.log(error);
+                    return;
+                }
+
+                const accounts = await ethereum.request({ method: "eth_accounts" });
+                console.log("Connected to MetaMask:", accounts[0]);
+            } else {
+                console.log("MetaMask is not installed!");
+                return;
+            }
+
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                try {
+                    await window.ethereum.enable();
+                    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: `0x${polygonNetworkId.toString(16)}` }] }).catch(async () => {
+                    await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: `0x${polygonNetworkId.toString(16)}`, rpcUrl: 'https://rpc-mainnet.maticvigil.com', nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 }, blockExplorerUrls: ['https://polygonscan.com/'] }] });
+                    });
+
+                    console.log("connect to metamask");
+                } catch (error) {
+                    console.log(error);
+                    return;
+                }
+            } else {
+                console.log("MetaMask is not installed!");
+                return;
+            }
+            var contractAbi = [
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "_owner",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
+                },
+                {
+                    "inputs": [],
+                    "name": "balance",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "deposit",
+                    "outputs": [],
+                    "stateMutability": "payable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "owner",
+                    "outputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "withdraw",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }
+            ];
+            var contractAddress = "0x83D3792D3349798b2A479ccCC9eF3c3D068f6765";
+
+            const contractInstance = new web3.eth.Contract(
+                contractAbi,
+                contractAddress
+            );
+
+            const depositButton = document.querySelector(".depositbutton");
+            const amountInput = document.querySelector(".deposit");
+
+            depositButton.addEventListener("click", async () => {
+                const amount = amountInput.value;
+
+                const accounts = await web3.eth.getAccounts();
+                if (accounts.length === 0) {
+                    console.log("No account found.");
+                    return;
+                }
+
+
+                try {
+                    await contractInstance.methods.deposit().send({
+                        from: accounts[0],
+                        value: web3.utils.toWei(amount, "ether"),
+                        gasPrice: web3.utils.toWei('20', 'gwei'),
+                        gasLimit: 500000,
+                    });
+                    console.log(`Deposited ${amount} tokens.`);
+                } catch (error) {
+                    console.error(error);
+                }
+
+            });
+        }
+        async function withdraw() {
+            if (typeof window.ethereum !== "undefined") {
+                console.log("MetaMask is installed!");
+
+                try {
+                    await ethereum.request({ method: "eth_requestAccounts" });
+                    console.log("connect to metamask");
+                } catch (error) {
+                    console.log(error);
+                    return;
+                }
+
+                const accounts = await ethereum.request({ method: "eth_accounts" });
+                console.log("Connected to MetaMask:", accounts[0]);
+            } else {
+                console.log("MetaMask is not installed!");
+                return;
+            }
+
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                try {
+                    await window.ethereum.enable();
+                    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: `0x${polygonNetworkId.toString(16)}` }] }).catch(async () => {
+                    await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: `0x${polygonNetworkId.toString(16)}`, rpcUrl: 'https://rpc-mainnet.maticvigil.com', nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 }, blockExplorerUrls: ['https://polygonscan.com/'] }] });
+                    });
+
+                    console.log("connect to metamask");
+                } catch (error) {
+                    console.log(error);
+                    return;
+                }
+            } else {
+                console.log("MetaMask is not installed!");
+                return;
+            }
+
+            var contractAbi = [
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "_owner",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
+                },
+                {
+                    "inputs": [],
+                    "name": "balance",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "deposit",
+                    "outputs": [],
+                    "stateMutability": "payable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "owner",
+                    "outputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "withdraw",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }
+            ];
+            var contractAddress = "0x83D3792D3349798b2A479ccCC9eF3c3D068f6765";
+
+            const contractInstance = new web3.eth.Contract(
+                contractAbi,
+                contractAddress
+            );
+
+            const withdrawalButton = document.querySelector(".withdrawalbutton");
+            const amountInput = document.querySelector(".withdrawal");
+
+            withdrawalButton.addEventListener("click", async () => {
+                const amount = amountInput.value;
+
+                const accounts = await web3.eth.getAccounts();
+                if (accounts.length === 0) {
+                    console.log("No account found.");
+                    return;
+                }
+
+                try {
+                    await contractInstance.methods.withdraw(amount).send({
+                        from: accounts[0],
+                        gasPrice: web3.utils.toWei('20', 'gwei'),
+                        gasLimit: 500000,
+                    });
+                    console.log(`Withdrew ${amount} tokens.`);
+                } catch (error) {
+                    console.error(error);
+                }
+
+            });
+        }
+
+
+
+    </script>
+</body>
+
+</html>
